@@ -42,3 +42,8 @@ target 'rnadvantage' do
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
 end
+
+target 'ImageNotification' do
+  use_frameworks! :linkage => :static
+  pod 'Firebase/Messaging', '~> 10.2.0'
+end

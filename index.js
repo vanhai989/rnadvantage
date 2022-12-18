@@ -8,6 +8,7 @@ import {name as appName} from './app.json';
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import {setStringValue} from './src/asyncStorage';
 
 PushNotification.createChannel(
   {
@@ -22,66 +23,11 @@ PushNotification.createChannel(
     console.log(`createChannel 'default-channel-id' returned '${created}'`), // (optional) callback returns whether the channel was created, false means it already existed.
 );
 
-PushNotification.configure({
-  onRegister: function (token) {
-    // if (Platform.OS === 'android') {
-    //   FCM_TOKEN.token = token.token;
-    //   console.log('TOKEN:', token.token);
-    // }
-  },
-  onNotification: function (notification) {
-    console.log('Notification root: ', notification);
-    if (!notification) {
-      return;
-    }
-    // if (notification.badge) {
-      // let badgeNumber = notification.badge;
-      PushNotificationIOS.setApplicationIconBadgeNumber(10);
-      if (
-        Platform.OS === 'ios' &&
-        notification &&
-        notification.finish &&
-        typeof notification.finish === 'function'
-      ) {
-        if (
-          notification &&
-          PushNotificationIOS &&
-          PushNotificationIOS.FetchResult &&
-          PushNotificationIOS.FetchResult.NoData
-        ) {
-          notification.finish(PushNotificationIOS.FetchResult.NoData);
-        }
-      }
-    // }
-    if (notification?.userInteraction) {
-      handleTapNotification(notification).then(res => {});
-    }
-  },
-  onAction: function (notification) {
-    console.log('ACTION:', notification.action);
-    console.log('NOTIFICATION ON ACTION:', notification);
-  },
-  onRegistrationError: function (err) {
-    console.error(err.message, err);
-  },
-  permissions: {
-    alert: true,
-    badge: true,
-    sound: true,
-  },
-  popInitialNotification: true,
-  requestPermissions: true,
-});
-
-const handleTapNotification = async notification => {
-  console.log('Handle tap notification');
-};
-
-
 // Register background handler
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('Message handled in the background!', remoteMessage);
-});
+// messaging().setBackgroundMessageHandler(async remoteMessage => {
+//   setStringValue('background_message', 'background message is called!');
+//   console.log('Message handled in the background!', remoteMessage);
+// });
 
 // function HeadlessCheck({isHeadless}) {
 //   if (isHeadless) {

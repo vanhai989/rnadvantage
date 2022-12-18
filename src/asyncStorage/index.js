@@ -17,9 +17,9 @@ const setObjectValue = async value => {
   }
 };
 
-const getMyStringValue = async () => {
+const getMyStringValue = async key => {
   try {
-    return await AsyncStorage.getItem('@key');
+    return await AsyncStorage.getItem(key);
   } catch (e) {
     // read error
   }
