@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "633715192218",
+    "project_id": "rnadvantage-291f9",
+    "storage_bucket": "rnadvantage-291f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633715192218:android:fcd9dcba8499e9130cca23",
+        "android_client_info": {
+          "package_name": "com.rnadvantage"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "633715192218-34vcsi9o3gnjqtr95kcireulbcam5ij1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZsHdWsocLTIMxd5yMfPYmV2SsPiIZo8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "633715192218-34vcsi9o3gnjqtr95kcireulbcam5ij1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "633715192218-835e3mqh8gvurka1iipvc9lvcteeq7v5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.rnadvantage",
+                "app_store_id": "1617027724"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -46,11 +46,17 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    PushNotificationIOS.addEventListener('notification', onRemoteNotification);
+    if (Platform.OS === 'ios') {
+      PushNotificationIOS.addEventListener(
+        'notification',
+        onRemoteNotification,
+      );
+    }
   });
+
   const onRemoteNotification = notification => {
     console.log('onRemoteNotification setApplicationIconBadgeNumber');
-    PushNotificationIOS.setApplicationIconBadgeNumber(2);
+    // PushNotificationIOS.setApplicationIconBadgeNumber(2);
     const isClicked = notification.getData().userInteraction === 1;
 
     if (isClicked) {
@@ -82,7 +88,9 @@ const App = () => {
         vibrate: false,
         id: 0,
         title: remoteMessage.title,
-        // message: remoteMessage.body,
+        message: remoteMessage.body,
+        picture:
+          'https://png.pngtree.com/png-vector/20191101/ourmid/pngtree-cartoon-color-simple-male-avatar-png-image_1934459.jpg',
       });
     } else {
       PushNotification.localNotification({
