@@ -1,13 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Alert, Button, Platform, SafeAreaView, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Alert, Button, Platform, SafeAreaView} from 'react-native';
 import {getMyStringValue, setStringValue} from './src/asyncStorage';
 import {
   getFCMToken,
   requestUserPermission,
 } from './src/notification/requestPermission';
-// import './src/notification';
 import messaging from '@react-native-firebase/messaging';
-// import RemotePushController from './src/notification/RemotePushController';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 
@@ -51,6 +49,8 @@ const App = () => {
         'notification',
         onRemoteNotification,
       );
+    } else {
+      // requestCameraPermission();
     }
   });
 
@@ -81,16 +81,29 @@ const App = () => {
   };
 
   const onMessageReceived = remoteMessage => {
-    console.log('onMessageReceived');
+    // requestCameraPermission();
+    // return;
+
+    // console.log('onMessageReceived');
     if (Platform.OS === 'android') {
+      console.log('pushLocal android');
+
+      // createDefaultChannels();
+
       PushNotification.localNotification({
-        channelId: 'default-channel-id',
-        vibrate: false,
-        id: 0,
-        title: remoteMessage.title,
-        message: remoteMessage.body,
-        picture:
-          'https://png.pngtree.com/png-vector/20191101/ourmid/pngtree-cartoon-color-simple-male-avatar-png-image_1934459.jpg',
+        channelId: 'default-channel-id', // (required)
+        channelName: 'My channel', // (required)
+        autoCancel: true,
+        bigText: 'this is local push notification text',
+        subText: 'local nofification subtext',
+        title: 'local notification title',
+        message: 'hey, expand me',
+        channelDescription: 'A My channel', // (optional) default: undefined.
+        playSound: true,
+        importance: 10,
+        soundName: 'default',
+        vibrate: true,
+        vibration: 1000,
       });
     } else {
       PushNotification.localNotification({
@@ -101,16 +114,16 @@ const App = () => {
           'https://png.pngtree.com/png-vector/20191101/ourmid/pngtree-cartoon-color-simple-male-avatar-png-image_1934459.jpg',
       });
     }
+    if (Platform.OS === 'android') {
+      PushNotification.cancelLocalNotification('123');
+    }
   };
 
   return (
     <SafeAreaView>
       <Button title="push local" onPress={pushLocal} />
-      {/* <RemotePushController /> */}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({});
 
 export default App;
