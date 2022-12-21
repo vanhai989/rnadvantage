@@ -4,10 +4,8 @@ import {
   SafeAreaView,
   View,
   Text,
-  Button,
   FlatList,
   StyleSheet,
-  StatusBar,
   KeyboardAvoidingView,
   Dimensions,
   TextInput,
@@ -19,11 +17,6 @@ import uuid from 'react-native-uuid';
 const TYPES = {
   USER: 'user',
   ADMIN: 'admin',
-};
-
-const ACTIONS = {
-  SENT_USER: 'sent_user',
-  SENT_ADMIN: 'sent_admin',
 };
 
 const windowWidth = Dimensions.get('window').width;
@@ -53,87 +46,104 @@ const initialState = {
   ],
 };
 
+const checkIsAddMessageToGroup = (state, indexOfLastItem, actionType) => {
+  if (
+    state.messages.length === 0 ||
+    indexOfLastItem === -1 ||
+    state.messages[0].type !== actionType
+  ) {
+    return true;
+  }
+  const currentDateTime = new Date().getTime();
+  // create new group message after 2 minutes
+  if (
+    currentDateTime -
+      new Date(state.messages[indexOfLastItem].dateCreated).getTime() <
+    1200000
+  ) {
+    return false;
+  } else {
+    return true;
+  }
+};
+
+const createNewGroupMessage = (message, type) => {
+  return {
+    dateCreated: new Date(),
+    type: type,
+    groupMessage: [createNewMessage(message, type)],
+  };
+};
+
+const createNewMessage = (message, type) => {
+  return {
+    id: uuid.v4(),
+    type: type,
+    message: message,
+    dateCreated: new Date(),
+  };
+};
+
 function reducer(state, action) {
+  let indexOfLastItem = -1;
+  let isAddMessageToGroup = false;
+  let newMessage = {};
+  let newGroupMessage = [];
+  const found = state.messages.findIndex((e, i) => {
+    if (e.type === action.type) {
+      indexOfLastItem = i;
+      return true;
+    }
+  });
+  if (['user', 'admin'].includes(action.type)) {
+    isAddMessageToGroup = checkIsAddMessageToGroup(
+      state,
+      indexOfLastItem,
+      action.type,
+    );
+    newMessage = createNewMessage(action.message, action.type);
+    newGroupMessage = createNewGroupMessage(action.message, action.type);
+  }
   switch (action.type) {
-    case ACTIONS.SENT_USER:
-      if (state.messages.length > 0) {
-        const currentDateTime = new Date().getTime();
-        const messageUser = {
-          id: uuid.v4(),
-          type: TYPES.USER,
-          message: action.message,
-          dateCreated: new Date(),
-        };
-        let indexOfLastItem = -1;
-        const found = state.messages.findLast((e, i) => {
-          if (e.type === TYPES.USER) {
-            indexOfLastItem = i;
-            console.log(i);
-            return true;
-          }
-        });
-
-        console.log('indexOfLastItem', indexOfLastItem);
-        if (
-          currentDateTime -
-            new Date(state.messages[indexOfLastItem].dateCreated).getTime() >=
-          120000
-        ) {
-          // create new group messages
-          console.log('11');
-
-          const addNewMessageUser = {
-            dateCreated: new Date(),
-            type: TYPES.USER,
-            groupMessage: [
-              {
-                id: uuid.v4(),
-                type: TYPES.USER,
-                message: action.message,
-                dateCreated: new Date(),
-              },
-            ],
+    case TYPES.USER:
+      if (indexOfLastItem !== -1) {
+        if (isAddMessageToGroup) {
+          return {
+            messages: [newGroupMessage, ...state.messages],
+            count: state.count + 1,
           };
-
-          return {messages: [addNewMessageUser, ...state.messages]};
         } else {
           // add a message to a group messages
-          // lastMessage.groupMessage.push(messageUser);
-          const newMessages = state.messages;
-          newMessages[state.messages.length - 1].groupMessage.push(messageUser);
-          console.log('newMessages', newMessages);
-          return {messages: newMessages};
+          const newMessagesUser = state.messages;
+          newMessagesUser[indexOfLastItem].groupMessage.push(newMessage);
+          return {messages: newMessagesUser, count: state.count + 1};
         }
       } else {
         // create first messages
-        const newMessageUser = {
-          dateCreated: new Date(),
-          type: TYPES.USER,
-          groupMessage: [
-            {
-              id: uuid.v4(),
-              type: TYPES.USER,
-              message: action.message,
-              dateCreated: new Date(),
-            },
-          ],
+        return {
+          messages: [newGroupMessage, ...state.messages],
+          count: state.count + 1,
         };
-        return {messages: [newMessageUser]};
       }
-    case ACTIONS.SENT_ADMIN:
-      const newMessageAdmin = {
-        dateCreated: new Date(),
-        type: TYPES.ADMIN,
-        groupMessage: [
-          {
-            id: uuid.v4(),
-            type: TYPES.ADMIN,
-            message: action.message,
-            dateCreated: new Date(),
-          },
-        ],
-      };
-      return {messages: [newMessageAdmin, ...state.messages]};
+    case TYPES.ADMIN:
+      if (indexOfLastItem !== -1) {
+        if (isAddMessageToGroup) {
+          return {
+            messages: [newGroupMessage, ...state.messages],
+            count: state.count + 1,
+          };
+        } else {
+          // add a message to a group messages
+          const newMessagesAdmin = state.messages;
+          newMessagesAdmin[indexOfLastItem].groupMessage.push(newMessage);
+          return {messages: newMessagesAdmin, count: state.count + 1};
+        }
+      } else {
+        return {
+          messages: [newGroupMessage, ...state.messages],
+          count: state.count + 1,
+        };
+      }
     default:
       throw new Error();
   }
@@ -144,36 +154,43 @@ const ChatScreen = () => {
   const [msg, setMsg] = useState('');
   const ref = useRef(null);
 
-  const renderItem = ({item}) => {
-    console.log('item', item);
+  const renderItem = ({item, index}) => {
     if (item.type === TYPES.USER) {
       return (
-        <View key={item.dateCreated}>
+        <View key={index}>
           <Text style={styles.dateCreated}>
             {moment(item.dateCreated).format('LT')}
           </Text>
-          {item.groupMessage.map((e, i) => {
-            return (
-              <View style={styles.wrapUserMessage} key={e.id}>
-                <View style={styles.userMessage}>
-                  <Text style={styles.userTitle}>{e.message}</Text>
-                </View>
+          {item.groupMessage.map(e => (
+            <View style={styles.wrapUserMessage} key={e.id}>
+              <View style={styles.userMessage}>
+                <Text style={styles.userTitle}>{e.message}</Text>
               </View>
-            );
-          })}
+            </View>
+          ))}
         </View>
       );
     } else {
       return (
-        <View style={styles.wrapAdminMessage} key={item.dateCreated}>
-          <Image
-            source={{
-              uri: 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/ce54bf11889067.562541ef7cde4.png',
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.adminMessage}>
-            <Text style={styles.adminTitle}>{item.message}</Text>
+        <View key={index}>
+          <Text style={styles.dateCreated}>
+            {moment(item.dateCreated).format('LT')}
+          </Text>
+          <View style={styles.wrapAdminMessage} key={item.dateCreated}>
+            <Image
+              source={{
+                uri: 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/ce54bf11889067.562541ef7cde4.png',
+              }}
+              style={styles.avatar}
+            />
+
+            <View>
+              {item.groupMessage.map(e => (
+                <View style={styles.adminMessage} key={e.id}>
+                  <Text style={styles.adminTitle}>{e.message}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       );
@@ -186,57 +203,58 @@ const ChatScreen = () => {
         ref={ref}
         style={styles.chatList}
         data={state.messages}
-        keyExtractor={item => {
-          return item.id;
+        keyExtractor={(item, index) => {
+          return index;
         }}
         inverted
-        renderItem={e => renderItem(e)}
+        renderItem={(e, i) => renderItem(e, i)}
         onEndReachedThreshold={0.5}
         removeClippedSubviews={true}
         initialNumToRender={5}
         maxToRenderPerBatch={1}
         updateCellsBatchingPeriod={100}
         windowSize={7}
+        showsVerticalScrollIndicator={false}
       />
     );
-  });
+  }, [state.count]);
 
   const send = type => {
     dispatch({type: type, message: msg});
   };
   return (
-    // <SafeAreaView>
-    <View style={styles.container}>
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={styles.keyboard}
-        keyboardVerticalOffset={windowHeight - 1000}>
-        {_renderFlatList}
-        <View>
-          <TextInput
-            value={msg}
-            placeholderTextColor="#000"
-            onChangeText={setMsg}
-            blurOnSubmit={false}
-            onSubmitEditing={() => send(ACTIONS.SENT_USER)}
-            placeholder="Enter a message"
-            returnKeyType="send"
-            style={styles.textInput}
-          />
-          <View style={styles.groupBtn}>
-            <TouchableOpacity
-              style={styles.uBtn}
-              onPress={() => send(ACTIONS.SENT_USER)}>
-              <Text>U</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => send(ACTIONS.SENT_ADMIN)}>
-              <Text>A</Text>
-            </TouchableOpacity>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={styles.keyboard}
+          keyboardVerticalOffset={windowHeight - 1000}>
+          {_renderFlatList}
+          <View>
+            <TextInput
+              value={msg}
+              placeholderTextColor="#000"
+              onChangeText={setMsg}
+              blurOnSubmit={false}
+              onSubmitEditing={() => send(TYPES.USER)}
+              placeholder="Enter a message"
+              returnKeyType="send"
+              style={styles.textInput}
+            />
+            <View style={styles.groupBtn}>
+              <TouchableOpacity
+                style={styles.uBtn}
+                onPress={() => send(TYPES.USER)}>
+                <Text>U</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => send(TYPES.ADMIN)}>
+                <Text>A</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
-    // </SafeAreaView>
+        </KeyboardAvoidingView>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -305,9 +323,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   wrapUserMessage: {
-    // flexDirection: 'row',
-    // justifyContent: 'flex-end',
-    // alignItems: 'center',
     alignItems: 'flex-end',
   },
   avatar: {
