@@ -8,7 +8,7 @@ import {
 import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ChatScreen from './src/routers/Chat';
 const App = () => {
@@ -68,6 +68,7 @@ const App = () => {
     }
   };
 
+  // test push notification here
   const pushLocal = () => {
     console.log('pushLocal');
     const messages = {
@@ -82,9 +83,6 @@ const App = () => {
   };
 
   const onMessageReceived = remoteMessage => {
-    // requestCameraPermission();
-    // return;
-
     if (Platform.OS === 'android') {
       console.log('pushLocal android');
 
@@ -118,9 +116,14 @@ const App = () => {
   };
 
   function HomeScreen() {
+    const navigation = useNavigation();
+    const goToScreen = router => {
+      navigation.navigate(router);
+    };
     return (
       <SafeAreaView>
-        <Button title="push local" onPress={pushLocal} />
+        <Button title="feature chat" onPress={() => goToScreen('Chat')} />
+        <Button title="feature chat" onPress={() => goToScreen('Chat')} />
       </SafeAreaView>
     );
   }
@@ -129,7 +132,7 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Chat">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
       </Stack.Navigator>
