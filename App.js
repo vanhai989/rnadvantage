@@ -7,10 +7,9 @@ import {
 } from './src/notification/requestPermission';
 import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import PushNotification from 'react-native-push-notification';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import ChatScreen from './src/routers/Chat';
+import {NavigationContainer} from '@react-navigation/native';
+import HomeStackNavigator from './src/stackNavigator/HomeStack';
+
 const App = () => {
   useEffect(() => {
     const fcmTokenValue = getMyStringValue('fcmToken');
@@ -68,74 +67,9 @@ const App = () => {
     }
   };
 
-  // test push notification here
-  const pushLocal = () => {
-    console.log('pushLocal');
-    const messages = {
-      channelId: 'default-channel-id',
-      vibrate: false,
-      id: 0,
-      title: 'title',
-      message: 'body123',
-      data: 'data',
-    };
-    onMessageReceived(messages);
-  };
-
-  const onMessageReceived = remoteMessage => {
-    if (Platform.OS === 'android') {
-      console.log('pushLocal android');
-
-      PushNotification.localNotification({
-        channelId: 'default-channel-id', // (required)
-        channelName: 'My channel', // (required)
-        autoCancel: true,
-        bigText: 'this is local push notification text',
-        subText: 'local nofification subtext',
-        title: 'local notification title',
-        message: 'hey, expand me',
-        channelDescription: 'A My channel', // (optional) default: undefined.
-        playSound: true,
-        importance: 10,
-        soundName: 'default',
-        vibrate: true,
-        vibration: 1000,
-      });
-    } else {
-      PushNotification.localNotification({
-        id: remoteMessage.messageId,
-        title: remoteMessage.title,
-        message: remoteMessage.message,
-        picture:
-          'https://png.pngtree.com/png-vector/20191101/ourmid/pngtree-cartoon-color-simple-male-avatar-png-image_1934459.jpg',
-      });
-    }
-    if (Platform.OS === 'android') {
-      PushNotification.cancelLocalNotification('123');
-    }
-  };
-
-  function HomeScreen() {
-    const navigation = useNavigation();
-    const goToScreen = router => {
-      navigation.navigate(router);
-    };
-    return (
-      <SafeAreaView>
-        <Button title="feature chat" onPress={() => goToScreen('Chat')} />
-        <Button title="feature chat" onPress={() => goToScreen('Chat')} />
-      </SafeAreaView>
-    );
-  }
-
-  const Stack = createNativeStackNavigator();
-
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Chat" component={ChatScreen} />
-      </Stack.Navigator>
+      <HomeStackNavigator />
     </NavigationContainer>
   );
 };
