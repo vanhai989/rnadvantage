@@ -11,8 +11,10 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import uuid from 'react-native-uuid';
+import KeyboardSpacer from 'react-native-keyboard-spacer';
 
 const TYPES = {
   USER: 'user',
@@ -222,37 +224,71 @@ const ChatScreen = () => {
   const send = type => {
     dispatch({type: type, message: msg});
   };
+
+  const androidTextInput = (
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={styles.keyboard}
+      keyboardVerticalOffset={windowHeight - 1000}>
+      {_renderFlatList}
+      <View>
+        <TextInput
+          value={msg}
+          placeholderTextColor="#000"
+          onChangeText={setMsg}
+          blurOnSubmit={false}
+          onSubmitEditing={() => send(TYPES.USER)}
+          placeholder="Enter a message"
+          returnKeyType="send"
+          style={styles.textInput}
+        />
+        <View style={styles.groupBtn}>
+          <TouchableOpacity
+            style={styles.uBtn}
+            onPress={() => send(TYPES.USER)}>
+            <Text>U</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => send(TYPES.ADMIN)}>
+            <Text>A</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
+  );
+
+  const iosTextInput = (
+    <View style={{flex: 1}}>
+      {_renderFlatList}
+      <View>
+        <TextInput
+          value={msg}
+          placeholderTextColor="#000"
+          onChangeText={setMsg}
+          blurOnSubmit={false}
+          onSubmitEditing={() => send(TYPES.USER)}
+          placeholder="Enter a message"
+          returnKeyType="send"
+          style={styles.textInput}
+        />
+        <View style={styles.groupBtn}>
+          <TouchableOpacity
+            style={styles.uBtn}
+            onPress={() => send(TYPES.USER)}>
+            <Text>U</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => send(TYPES.ADMIN)}>
+            <Text>A</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
-        <KeyboardAvoidingView
-          behavior="padding"
-          style={styles.keyboard}
-          keyboardVerticalOffset={windowHeight - 1000}>
-          {_renderFlatList}
-          <View>
-            <TextInput
-              value={msg}
-              placeholderTextColor="#000"
-              onChangeText={setMsg}
-              blurOnSubmit={false}
-              onSubmitEditing={() => send(TYPES.USER)}
-              placeholder="Enter a message"
-              returnKeyType="send"
-              style={styles.textInput}
-            />
-            <View style={styles.groupBtn}>
-              <TouchableOpacity
-                style={styles.uBtn}
-                onPress={() => send(TYPES.USER)}>
-                <Text>U</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => send(TYPES.ADMIN)}>
-                <Text>A</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
+        {Platform.OS === 'ios' ? iosTextInput : androidTextInput}
+        {Platform.OS === 'ios' && <KeyboardSpacer />}
       </View>
     </SafeAreaView>
   );
@@ -302,7 +338,7 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 0.5,
     borderColor: 'black',
-    marginBottom: 10,
+    marginBottom: 5,
     marginTop: 10,
     borderRadius: 5,
     zIndex: 9,

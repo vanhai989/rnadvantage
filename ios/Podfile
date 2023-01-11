@@ -11,6 +11,9 @@ target 'rnadvantage' do
   # Flags change depending on the env values.
   flags = get_default_flags()
 
+
+  # pod 'RCTLinkingIOS', :path => '../node_modules/react-native'
+
   use_react_native!(
     :path => config[:reactNativePath],
     # Hermes is now enabled by default. Disable by setting this flag to false.
@@ -45,5 +48,5 @@ end
 
 target 'ImageNotification' do
   use_frameworks! :linkage => :static
-  pod 'Firebase/Messaging', '~> 10.2.0'
+  pod 'Firebase/Messaging', '~> 10.3.0'
 end

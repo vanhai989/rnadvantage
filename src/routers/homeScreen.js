@@ -10,6 +10,39 @@ import {
 } from 'react-native';
 import PushNotification from 'react-native-push-notification';
 
+export const onMessageReceived = remoteMessage => {
+  if (Platform.OS === 'android') {
+    console.log('pushLocal android');
+
+    PushNotification.localNotification({
+      channelId: 'default-channel-id', // (required)
+      channelName: 'My channel', // (required)
+      autoCancel: true,
+      bigText: 'this is local push notification text',
+      subText: 'local nofification subtext',
+      title: 'local notification title',
+      message: 'hey, expand me',
+      channelDescription: 'A My channel', // (optional) default: undefined.
+      playSound: true,
+      importance: 10,
+      soundName: 'default',
+      vibrate: true,
+      vibration: 1000,
+    });
+  } else {
+    PushNotification.localNotification({
+      id: remoteMessage.messageId,
+      title: remoteMessage.title,
+      message: remoteMessage.message,
+      picture:
+        'https://png.pngtree.com/png-vector/20191101/ourmid/pngtree-cartoon-color-simple-male-avatar-png-image_1934459.jpg',
+    });
+  }
+  if (Platform.OS === 'android') {
+    PushNotification.cancelLocalNotification('123');
+  }
+};
+
 const HomeScreen = () => {
   const navigation = useNavigation();
   const goToScreen = router => {
@@ -28,39 +61,6 @@ const HomeScreen = () => {
       data: 'data',
     };
     onMessageReceived(messages);
-  };
-
-  const onMessageReceived = remoteMessage => {
-    if (Platform.OS === 'android') {
-      console.log('pushLocal android');
-
-      PushNotification.localNotification({
-        channelId: 'default-channel-id', // (required)
-        channelName: 'My channel', // (required)
-        autoCancel: true,
-        bigText: 'this is local push notification text',
-        subText: 'local nofification subtext',
-        title: 'local notification title',
-        message: 'hey, expand me',
-        channelDescription: 'A My channel', // (optional) default: undefined.
-        playSound: true,
-        importance: 10,
-        soundName: 'default',
-        vibrate: true,
-        vibration: 1000,
-      });
-    } else {
-      PushNotification.localNotification({
-        id: remoteMessage.messageId,
-        title: remoteMessage.title,
-        message: remoteMessage.message,
-        picture:
-          'https://png.pngtree.com/png-vector/20191101/ourmid/pngtree-cartoon-color-simple-male-avatar-png-image_1934459.jpg',
-      });
-    }
-    if (Platform.OS === 'android') {
-      PushNotification.cancelLocalNotification('123');
-    }
   };
 
   return (
