@@ -1,8 +1,11 @@
-[{
-    "relation": ["delegate_permission/common.handle_all_urls"],
-     "target": {
-         "namespace": "rnadvantage",
-         "package_name": "com.rnadvantage",
-         "Sha256_cert_fingerprints":  ["A3:21:CA:99:0F:68:24:C9:C4:3D:AF:C8:27:7F:E3:E2:43:AA:08:39:39:9E:50:D3:4A:AB:4E:67:0F:EB:1A:6F"]
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.rnadvantage",
+        "sha256_cert_fingerprints":
+          ["A3:21:CA:99:0F:68:24:C9:C4:3D:AF:C8:27:7F:E3:E2:43:AA:08:39:39:9E:50:D3:4A:AB:4E:67:0F:EB:1A:6F"]
+      }
     }
- }]
+  ]
