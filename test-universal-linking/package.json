@@ -1,0 +1,12 @@
+{
+  "name": "haidev",
+  "version": "1.0.0",
+  "description": "test universal linking",
+  "main": "index.js",
+  "repository": "testuniversallinking",
+  "author": "haidev",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
